@@ -1,0 +1,192 @@
+{
+  "name": "mcp-vision-bridge",
+  "version": "1.0.0",
+  "description": "MCP server that enables non-vision LLMs to utilize vision capabilities through OpenRouter",
+  "main": "dist/server/mcp-server.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "ts-node src/server/mcp-server.ts",
+    "start": "node dist/server/mcp-server.js",
+    "start:mcp": "npm run build && npm start",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "typecheck": "tsc --noEmit",
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "examples": "node examples/basic_usage.js",
+    "opencode:setup": "node examples/opencode_integration.js",
+    "openrouter:test": "node examples/openrouter_example.ts test",
+    "openrouter:models": "node examples/openrouter_example.ts models",
+    "openrouter:chat": "node examples/openrouter_example.ts chat",
+    "docker:build": "docker build -t mcp-vision-bridge:latest .",
+    "docker:run": "docker run -p 3000:3000 -e OPENROUTER_API_KEY=$OPENROUTER_API_KEY mcp-vision-bridge:latest",
+    "healthcheck": "node healthcheck.js"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "vision",
+    "multimodal",
+    "openrouter",
+    "opencode",
+    "llm",
+    "image-analysis",
+    "bridge",
+    "server"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/mcp-vision-bridge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/mcp-vision-bridge/issues"
+  },
+  "homepage": "https://github.com/yourusername/mcp-vision-bridge#readme",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "axios": "^1.6.0",
+    "winston": "^3.11.0",
+    "prom-client": "^15.0.0",
+    "joi": "^17.11.0",
+    "dotenv": "^16.3.1",
+    "sharp": "^0.33.0",
+    "node-cache": "^5.1.2",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "helmet": "^7.1.0",
+    "compression": "^1.7.4",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "@types/express": "^4.17.20",
+    "@types/cors": "^2.8.15",
+    "@types/compression": "^1.7.4",
+    "@types/morgan": "^1.9.7",
+    "@types/jest": "^29.5.0",
+    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/parser": "^6.0.0",
+    "eslint": "^8.50.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.0",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.2.0",
+    "rimraf": "^5.0.0",
+    "nodemon": "^3.0.0"
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "LICENSE",
+    ".env.example"
+  ],
+  "bin": {
+    "mcp-vision-bridge": "dist/server/mcp-server.js"
+  },
+  "mcp": {
+    "tools": [
+      {
+        "name": "analyze_image",
+        "description": "Analyze an image using vision-capable models",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "image_url": {
+              "type": "string",
+              "description": "URL or base64-encoded image data"
+            },
+            "prompt": {
+              "type": "string",
+              "description": "Analysis prompt"
+            },
+            "model": {
+              "type": "string",
+              "description": "Vision model to use"
+            },
+            "max_tokens": {
+              "type": "number",
+              "description": "Maximum tokens in response"
+            },
+            "temperature": {
+              "type": "number",
+              "description": "Sampling temperature"
+            },
+            "detail_level": {
+              "type": "string",
+              "enum": ["low", "medium", "high"],
+              "description": "Level of detail"
+            }
+          },
+          "required": ["image_url", "prompt"]
+        }
+      },
+      {
+        "name": "describe_image",
+        "description": "Get detailed description of image content",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "image_url": {
+              "type": "string",
+              "description": "URL or base64-encoded image data"
+            },
+            "detail_level": {
+              "type": "string",
+              "enum": ["low", "medium", "high"],
+              "description": "Level of detail"
+            },
+            "include_objects": {
+              "type": "boolean",
+              "description": "Include detected objects list"
+            },
+            "include_colors": {
+              "type": "boolean",
+              "description": "Include color analysis"
+            },
+            "include_text": {
+              "type": "boolean",
+              "description": "Extract visible text"
+            }
+          },
+          "required": ["image_url"]
+        }
+      },
+      {
+        "name": "extract_text_from_image",
+        "description": "Extract text content from images (OCR)",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "image_url": {
+              "type": "string",
+              "description": "URL or base64-encoded image data"
+            },
+            "language": {
+              "type": "string",
+              "description": "Language hint for OCR"
+            },
+            "preserve_formatting": {
+              "type": "boolean",
+              "description": "Preserve text formatting"
+            },
+            "include_confidence": {
+              "type": "boolean",
+              "description": "Include confidence scores"
+            }
+          },
+          "required": ["image_url"]
+        }
+      }
+    ]
+  }
+}
